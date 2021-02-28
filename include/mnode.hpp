@@ -27,6 +27,7 @@ class Mnode {
         void setParent(Mnode * p);
         void print();
         void genHash();
+        void deleteChild(Mnode * child);
     private:
         void HashFile();
         void HashDir();

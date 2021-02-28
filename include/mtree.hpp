@@ -14,5 +14,7 @@ class Mtree{
         Mtree();
         void populateTree(fs::path path);
         void print();
+        void addNode(fs::path path);
+        void nodeChanged(fs::path path, int change);
 
 };

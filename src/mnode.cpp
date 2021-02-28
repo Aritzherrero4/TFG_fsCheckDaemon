@@ -57,6 +57,11 @@
         }
         this->hash=value;
     }
+
+    void Mnode::deleteChild(Mnode * child){
+        child_nodes.erase(find(child_nodes.begin(),child_nodes.end(),child));
+        free(child);
+    }
     void Mnode::genHash(){
         if(type == MT_FILE)
             HashFile();
