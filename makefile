@@ -1,12 +1,12 @@
 CC = g++
-CFLAGS = -std=c++17 -lstdc++fs -lcryptopp -Wall -g
+CFLAGS = -std=c++17 -lstdc++fs -lcryptopp -Wall -lsystemd
 IDIR = ./include/
 SDIR = ./src/
 ODIR = ./obj/
 BDIR = ./bin/
 
-main: $(SDIR)main.cpp $(ODIR)mnode.o $(ODIR)mtree.o $(IDIR)mtree.hpp 
-	g++ -o main $(SDIR)main.cpp $(ODIR)mtree.o $(ODIR)mnode.o $(CFLAGS)
+main: $(SDIR)fsCheckDaemon.cpp $(IDIR)fsCheckDaemon.hpp $(ODIR)mnode.o $(ODIR)mtree.o $(IDIR)mtree.hpp 
+	g++ -o fsCheckDaemon $(SDIR)fsCheckDaemon.cpp $(ODIR)mtree.o $(ODIR)mnode.o $(CFLAGS)
 
 $(ODIR)mnode.o: $(SDIR)mnode.cpp $(IDIR)mnode.hpp
 	g++ -c $(SDIR)mnode.cpp -o $(ODIR)mnode.o $(CFLAGS)
