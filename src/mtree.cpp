@@ -90,7 +90,12 @@ void Mtree::addNode(fs::path path ){
   }
   n_nodes++;
   new_node->path=path;
-  new_node->setParent(getNodeFromPath(path.parent_path(), root_node));
+  //If the root path and the parent path of the file are the same
+  // we already know the node. 
+  if ((path.parent_path() / "") == root_node->path)
+    new_node->setParent(root_node);
+  else
+    new_node->setParent(getNodeFromPath(path.parent_path(), root_node));
   new_node->isLeaf=1;
   new_node->genHash();
   new_node->parent->addChild(new_node);

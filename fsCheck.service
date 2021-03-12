@@ -1,0 +1,15 @@
+# User level dbus -- for now
+# Enable
+# systemctl --user enable /home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.serice
+# Start /Stop
+# systemctl [start | stop] --user fsCheck.service
+[Unit]
+Description=Daemon to create a merkle tree and notify changes
+
+[Service]
+Type=Dbus
+ExecStart=/home/aritz/TFG-aritz/fsCheckDaemon/fsCheckDaemon
+BusName=net.aritzherrero.fsCheck
+
+[Install]
+WantedBy=multi-user.target
