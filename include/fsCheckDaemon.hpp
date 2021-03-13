@@ -35,6 +35,6 @@ void file_updated(fs::path path);
 
 static const sd_bus_vtable fscheck_vtable[] = {
         SD_BUS_VTABLE_START(0),
-        SD_BUS_METHOD("getUpdate", "is", "", method_getUpdate, SD_BUS_VTABLE_UNPRIVILEGED | SD_BUS_VTABLE_METHOD_NO_REPLY),
+        SD_BUS_METHOD("getUpdate", "is", "i", method_getUpdate, SD_BUS_VTABLE_UNPRIVILEGED | SD_BUS_VTABLE_METHOD_NO_REPLY),
         SD_BUS_VTABLE_END
 };

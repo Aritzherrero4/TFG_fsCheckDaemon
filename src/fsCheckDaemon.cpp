@@ -38,7 +38,8 @@ static int method_getUpdate(sd_bus_message *m, void *userdata, sd_bus_error *ret
             file_updated(path);
             break;
     }
-    fflush(log_file);   
+    fflush(log_file);
+    sd_bus_reply_method_return(m, "i", 1);   
     return r;
 }
 
