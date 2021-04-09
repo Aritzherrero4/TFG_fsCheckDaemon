@@ -1,3 +1,6 @@
+#include "../external/blake3/blake3.h"
+#include "../external/blake3/blake3_impl.h"
+
 #include <vector>
 #include <cryptopp/sha.h> //Will be replaced with blake2 or blake3
 #include <cryptopp/files.h>
@@ -6,6 +9,8 @@
 #include <cryptopp/hex.h>
 #include <iostream>
 #include <filesystem>
+
+
 
 #define MT_DIR 2
 #define MT_DIR_EMPTY 1

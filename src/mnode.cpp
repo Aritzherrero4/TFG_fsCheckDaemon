@@ -30,35 +30,39 @@ void Mnode::HashDir(){
     }
     //we add the dir path
     predata.append(path);
-    SHA256 hash;
-    StringSource fs( predata, true /* PumpAll */,
-          new HashFilter( hash, 
-            new HexEncoder( 
-              new StringSink( value )
-            ) // HexEncoder
-          ) // HashFilter
-        ); // FileSource
-    this->hash=value;
+    blake3_hasher hasher;
+    blake3_hasher_init(&hasher);
+    blake3_hasher_update(&hasher, predata.c_str(),sizeof(predata.c_str()));     
+    uint8_t output[BLAKE3_OUT_LEN];
+    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+    std::ostringstream convert;
+    for (int a = 0; a < BLAKE3_OUT_LEN; a++) {
+        convert << std::uppercase << std::hex << (int)output[a];
+    }
+    this->hash=convert.str(); 
 }
 /* Function to calculate and set the hash of the file*/
 void Mnode::HashFile(){
     std::ifstream in{path,std::ios::binary};
-    using namespace CryptoPP;
-    SHA256 hash;
-    std::string value;
-    try {
-    FileSource fs( in, true /* PumpAll */,
-          new HashFilter( hash, 
-            new HexEncoder( 
-              new StringSink( value )
-            ) // HexEncoder
-          ) // HashFilter
-        ); // FileSource
+    blake3_hasher hasher;
+
+    blake3_hasher_init(&hasher);
+
+    char buf[65536];
+    std::streamsize s;
+
+    while(!in.eof()){
+       in.read(buf, sizeof(buf));
+       s=in.gcount();
+       blake3_hasher_update(&hasher, buf, s);     
     }
-    catch (const CryptoPP::FileStore::ReadErr& e){
-        std::cout << "FSError:" << path << "\n";
+    uint8_t output[BLAKE3_OUT_LEN];
+    blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
+    std::ostringstream convert;
+    for (int i = 0; i < BLAKE3_OUT_LEN; i++) {
+        convert << std::uppercase << std::hex << (int)output[i];
     }
-    this->hash=value;
+    this->hash=convert.str();
 }
 /* Erase and free the specified child*/
 void Mnode::deleteChild(Mnode * child){
