@@ -56,6 +56,9 @@ int calculateChilds(fs::path path, Mnode *tmp_node)
   return n;
 }
 
+/* Main function to initialize the tree
+ * It calculates the members of the tree and the hashes
+ */
 void Mtree::populateTree(fs::path path)
 {
   this->n_nodes = calculateChilds(path, this->root_node);
@@ -63,6 +66,7 @@ void Mtree::populateTree(fs::path path)
   this->root_hash = this->root_node->hash;
 }
 
+/* Obtain the pointer of the node that corresponds to the input path */
 Mnode * getNodeFromPath(fs::path path, Mnode * root){
         Mnode * tmp_node;
         if (root->path == path)
@@ -77,6 +81,9 @@ Mnode * getNodeFromPath(fs::path path, Mnode * root){
         return NULL;
 }
 
+/* Add a node to the tree and calculate the new hash
+* of the changed branch to the root.
+*/
 void Mtree::addNode(fs::path path ){
   Mnode *new_node = new Mnode();
 
@@ -110,6 +117,10 @@ void Mtree::addNode(fs::path path ){
 
 }
 
+/* Update the hash of a changed file and update the hash
+*  of the corresponding brach. 
+*  For Edited or deteled files
+*/
 void Mtree::nodeChanged(fs::path path, int change){
   Mnode * tmp_node = getNodeFromPath(path, root_node);
   Mnode * parent;
