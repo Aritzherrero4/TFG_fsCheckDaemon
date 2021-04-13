@@ -22,7 +22,6 @@ void Mnode::print(){
 // Needs to be improved
 /*Function to calculate and set the hash of a directoy*/
 void Mnode::HashDir(){
-    using namespace CryptoPP;
     std::string predata="", value;
     //For each child, we concatenate the hash
      for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
@@ -66,7 +65,7 @@ void Mnode::HashFile(){
 }
 /* Erase and free the specified child*/
 void Mnode::deleteChild(Mnode * child){
-    child_nodes.erase(find(child_nodes.begin(),child_nodes.end(),child));
+    child_nodes.erase(std::find(child_nodes.begin(),child_nodes.end(),child));
     free(child);
 }
 /* Caller function to generate the hash of any node

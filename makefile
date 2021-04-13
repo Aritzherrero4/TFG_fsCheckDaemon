@@ -7,10 +7,14 @@ ODIR = ./obj/
 BDIR = ./bin/
 LDIR = ./lib/
 BLAKE = ./external/blake3/
-LD = -Wl,-rpath,$(LDIR) -L$(LDIR) -I$(BLAKE)
+LIBDIR=$(abspath $(LDIR))
+LD = -Wl,-rpath,$(LIBDIR) -L$(LIBDIR) -I$(BLAKE)
 
-main:$(SDIR)fsCheckDaemon.cpp $(IDIR)fsCheckDaemon.hpp $(ODIR)mnode.o $(ODIR)mtree.o $(IDIR)mtree.hpp 
-	g++ $(LD) -o fsCheckDaemon $(SDIR)fsCheckDaemon.cpp $(ODIR)mtree.o $(ODIR)mnode.o -lblake3 $(CFLAGS) 
+main:$(SDIR)fsCheckDaemon.cpp $(IDIR)fsCheckDaemon.hpp $(ODIR)mnode.o $(ODIR)mtree.o $(IDIR)mtree.hpp $(ODIR)utils.o $(IDIR)utils.hpp
+	g++ $(LD) -o fsCheckDaemon $(SDIR)fsCheckDaemon.cpp $(ODIR)mtree.o $(ODIR)mnode.o $(ODIR)utils.o -lblake3 $(CFLAGS) 
+
+$(ODIR)utils.o: $(SDIR)utils.cpp $(IDIR)utils.hpp
+	g++ -c $(SDIR)utils.cpp -o $(ODIR)utils.o -std=c++17 -lstdc++fs -Wall
 
 $(ODIR)mnode.o: $(SDIR)mnode.cpp $(IDIR)mnode.hpp
 	g++ $(LD) -c $(SDIR)mnode.cpp -o $(ODIR)mnode.o -lblake3 $(CFLAGS) 

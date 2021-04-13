@@ -9,6 +9,7 @@
 #include <systemd/sd-daemon.h>
 #include <systemd/sd-bus.h>
 
+#include "../include/utils.hpp"
 #include "../include/mtree.hpp"
 
 

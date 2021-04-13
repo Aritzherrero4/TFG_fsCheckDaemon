@@ -91,7 +91,7 @@ int initialize(){
     //Request a well-known name so clients can find the service
     r = sd_bus_request_name(bus, "net.aritzherrero.fsCheck", 0);
     if (r < 0) {
-        fprintf(stderr, "Failed to acquire service name: %s\n", strerror(-r));
+        fprintf(log_file, "Failed to acquire service name: %s\n", strerror(-r));
         return r;
     }
 
@@ -120,22 +120,27 @@ void file_added(fs::path p){
 
 
 int main(){
-
     /*Prepare and configure all the logging and the daemon structure related
      *The dbus conenection is also estabilished */
     int r; 
     r = initialize();
-
+    if (r < 0)
+        exit(r);
     /* In the future, the path to control will be read from a configuration file 
     *  This file will be the same for both the daemon and the module 
     *  For now, it will be hardcoded here
     */
-    fs::path p = "/home/aritz/test/root/";
-
+    fs::path p;
+    r = getPathFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &p);
+    if (r < 0){
+        fprintf(log_file, "Failed to read configuration file.");
+        exit(r);
+    }
+        
     //Initialize the merkle tree
     tree = new Mtree();
     tree->populateTree(p);
-
+    fprintf(log_file, SD_INFO "Config file read. Path:%s\n", p.c_str());
     fprintf(log_file,SD_INFO "Tree initialized\n");
     fprintf(log_file,SD_INFO "Root hash: %s\n", tree->root_hash.c_str());
     fflush(log_file);

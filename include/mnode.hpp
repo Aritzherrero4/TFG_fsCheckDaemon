@@ -2,12 +2,9 @@
 #include "../external/blake3/blake3_impl.h"
 
 #include <vector>
-#include <cryptopp/sha.h> //Will be replaced with blake2 or blake3
-#include <cryptopp/files.h>
-#include <cryptopp/filters.h>
-#include <cryptopp/cryptlib.h>
-#include <cryptopp/hex.h>
 #include <iostream>
+#include <algorithm>
+#include <fstream>
 #include <filesystem>
 
 
