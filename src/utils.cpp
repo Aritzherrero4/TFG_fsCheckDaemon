@@ -22,7 +22,9 @@ int getPathFromConfig(fs::path configFile, fs::path *cp){
         auto dp = line.find("=");
         auto name = line.substr(0, dp);
         if (name == "basePath"){
-            auto value = line.substr(dp + 1);
+            std::string value = line.substr(dp + 1);
+            if (value.back()== '/')
+                value.pop_back();
             cp->assign(value);
             fs::file_status s = fs::symlink_status(*cp);
             if(!fs::is_directory(s)){

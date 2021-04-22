@@ -22,16 +22,16 @@ void Mnode::print(){
 // Needs to be improved
 /*Function to calculate and set the hash of a directoy*/
 void Mnode::HashDir(){
-    std::string predata="", value;
-    //For each child, we concatenate the hash
-     for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
-        predata.append((*it)->hash);
-    }
-    //we add the dir path
-    predata.append(path);
+    std::string value;
     blake3_hasher hasher;
     blake3_hasher_init(&hasher);
-    blake3_hasher_update(&hasher, predata.c_str(),sizeof(predata.c_str()));     
+    //For each child, we concatenate the hash
+     for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
+        blake3_hasher_update(&hasher, (*it)->hash.c_str() , sizeof((*it)->hash.c_str()));
+    }
+    //we add the dir path
+    blake3_hasher_update(&hasher, path.c_str(),sizeof(path.c_str()));
+
     uint8_t output[BLAKE3_OUT_LEN];
     blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
     std::ostringstream convert;
