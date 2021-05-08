@@ -137,7 +137,7 @@ int main(){
         exit(r);
     }
         
-    //Initialize the merkle tree
+    //get the hash algorithm to use and initialize the merkle tree
     int m;
     r = getHashModeFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &m);
     if (r == -1){
@@ -150,11 +150,12 @@ int main(){
     fprintf (log_file, SD_INFO "Using %s%s", (m==0) ? ("BLAKE3") : ("SHA256"), " hash algotithm\n");
     tree = new Mtree(m);
     tree->populateTree(p);
+
     fprintf(log_file, SD_INFO "Config file read. Path:%s\n", p.c_str());
     fprintf(log_file,SD_INFO "Tree initialized\n");
     fprintf(log_file,SD_INFO "Root hash: %s\n", tree->root_hash.c_str());
     fflush(log_file);
-    tree->print();
+    
     //At this point, the daemon will wait until something new happens
     //Read the updates from the kernel module
     while(1){

@@ -1,9 +1,14 @@
+#ifndef MNODE_HPP
+#define MNODE_HPP
+
+/*Cryptopp includes for sh256*/
 #include <cryptopp/sha.h> 
 #include <cryptopp/files.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/hex.h>
 
+/*Blake3 includes for blake3*/
 #include "../external/blake3/blake3.h"
 #include "../external/blake3/blake3_impl.h"
 
@@ -19,6 +24,7 @@
 #define MT_DIR_EMPTY 1
 #define MT_FILE 0
 
+/*Hash mode defines*/
 #define _BLAKE3 0
 #define _SHA256 1
 
@@ -41,10 +47,16 @@ class Mnode {
         void genHash();
         void deleteChild(Mnode * child);
     private:
-        void _blake3_HashFile();
+        /*Blake3 hash functions*/
+        void _blake3_HashFile(); 
         void _blake3_HashDir();
+
+        /*SHA256 hash functions*/
         void _sha256_HashFile();
         void _sha256_HashDir();
+
+        /*std functions holders for the selected hash variant*/
         std::function<void(Mnode *)> HashDir;
         std::function<void(Mnode *)> HashFile;
 };
+#endif

@@ -1,3 +1,6 @@
+#ifndef MTREE_HPP
+#define MTREE_HPP
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -10,7 +13,7 @@ class Mtree{
         int n_nodes; //Total number of files and dirs
         Mnode *root_node; // Pointer of the top node
         std::string root_hash;
-        int hashMode=_BLAKE3;
+        int hashMode=_BLAKE3; //Default hash mode is blake3
 
         Mtree();
         Mtree(int hashMode);
@@ -20,3 +23,4 @@ class Mtree{
         void nodeChanged(fs::path path, int change);
 
 };
+#endif

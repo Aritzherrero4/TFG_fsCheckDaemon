@@ -1,15 +1,18 @@
 #include "../include/mnode.hpp"
+
+/*Default constructor, set the hash functions to the blake3 variant*/
 Mnode::Mnode(){
      HashDir = std::bind(&Mnode::_blake3_HashDir, this);
      HashFile = std::bind(&Mnode::_blake3_HashFile, this);
 }
 
+/* Constructor, set the hash function variant acording to the mode parameter*/
 Mnode::Mnode(int mode){
-    if (mode==0){
+    if (mode==_BLAKE3){
         HashDir = std::bind(&Mnode::_blake3_HashDir, this);
         HashFile = std::bind(&Mnode::_blake3_HashFile, this);       
     }
-    if (mode==1){
+    if (mode==_SHA256){
         HashDir = std::bind(&Mnode::_sha256_HashDir, this);
         HashFile = std::bind(&Mnode::_sha256_HashFile, this);            
     }
@@ -18,9 +21,11 @@ Mnode::Mnode(int mode){
 void Mnode::addChild(Mnode * ch){
     child_nodes.push_back(ch);
 }
+
 void Mnode::setParent(Mnode * p){
     parent = p;
 }
+
 void Mnode::print(){
     std::cout << path << ": ";
     //if(type==MT_FILE)
@@ -32,9 +37,7 @@ void Mnode::print(){
     }
 }
 
-//At first we'll asume all the child hashes are present and already calculated.
-// Needs to be improved
-/*Function to calculate and set the hash of a directoy*/
+/*Function to calculate and set the hash of a directoy using blake3*/
 void Mnode::_blake3_HashDir(){
     std::string value;
     blake3_hasher hasher;
@@ -54,7 +57,7 @@ void Mnode::_blake3_HashDir(){
     }
     this->hash=convert.str(); 
 }
-/* Function to calculate and set the hash of the file*/
+/* Function to calculate and set the hash of the file using blake3*/
 void Mnode::_blake3_HashFile(){
     std::ifstream in{path,std::ios::binary};
     blake3_hasher hasher;
@@ -78,9 +81,7 @@ void Mnode::_blake3_HashFile(){
     this->hash=convert.str();
 }
 
-//At first we'll asume all the child hashes are present and already calculated.
-// Needs to be improved
-/*Function to calculate and set the hash of a directoy*/
+/*Function to calculate and set the hash of a directoy with sha256*/
 void Mnode::_sha256_HashDir(){
     using namespace CryptoPP;
     std::string predata="", value;
@@ -101,7 +102,7 @@ void Mnode::_sha256_HashDir(){
     this->hash=value;
 }
 
-/* Function to calculate and set the hash of the file*/
+/* Function to calculate and set the hash of the file with sha256*/
 void Mnode::_sha256_HashFile(){
     std::ifstream in{path,std::ios::binary};
     using namespace CryptoPP;
@@ -121,6 +122,7 @@ void Mnode::_sha256_HashFile(){
     }
     this->hash=value;
 }
+
 /* Erase and free the specified child*/
 void Mnode::deleteChild(Mnode * child){
     child_nodes.erase(std::find(child_nodes.begin(),child_nodes.end(),child));

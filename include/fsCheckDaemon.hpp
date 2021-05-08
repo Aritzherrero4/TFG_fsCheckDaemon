@@ -1,3 +1,6 @@
+#ifndef FSCHECK_HPP
+#define FSCHECK_HPP
+
 #include <signal.h>
 #include <syslog.h>
 #include <stdlib.h>
@@ -40,3 +43,4 @@ static const sd_bus_vtable fscheck_vtable[] = {
         SD_BUS_METHOD("getUpdate", "is", "i", method_getUpdate, SD_BUS_VTABLE_UNPRIVILEGED | SD_BUS_VTABLE_METHOD_NO_REPLY),
         SD_BUS_VTABLE_END
 };
+#endif
