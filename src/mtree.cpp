@@ -4,9 +4,15 @@ using namespace std;
 Mtree::Mtree()
 {
   n_nodes = 0;
-  root_node = new Mnode();
+  root_node = new Mnode(hashMode);
 }
 
+Mtree::Mtree(int hashMode)
+{
+  n_nodes = 0;
+  this->hashMode=hashMode;
+  root_node = new Mnode(hashMode);
+}
 // Function to test the output
 //To be removed
 // void getFsDirList(fs::path path){
@@ -16,7 +22,7 @@ Mtree::Mtree()
 //   }
 // }
 
-int calculateChilds(fs::path path, Mnode *tmp_node)
+int calculateChilds(fs::path path, Mnode *tmp_node, int hashMode)
 {
   tmp_node->isLeaf = 0;
   tmp_node->type = MT_DIR;
@@ -32,8 +38,8 @@ int calculateChilds(fs::path path, Mnode *tmp_node)
 
     if (fs::is_directory(s))
     {
-      Mnode *d_node = new Mnode();
-      n += calculateChilds(p, d_node);
+      Mnode *d_node = new Mnode(hashMode);
+      n += calculateChilds(p, d_node, hashMode);
       d_node->setParent(tmp_node);
       d_node->isLeaf = 0;
       d_node->type = MT_DIR;
@@ -44,7 +50,7 @@ int calculateChilds(fs::path path, Mnode *tmp_node)
     if (fs::is_regular_file(s))
     {
       n++;
-      Mnode *f_node = new Mnode();
+      Mnode *f_node = new Mnode(hashMode);
       f_node->setParent(tmp_node);
       f_node->isLeaf = 1;
       f_node->type = MT_FILE;
@@ -61,7 +67,7 @@ int calculateChilds(fs::path path, Mnode *tmp_node)
  */
 void Mtree::populateTree(fs::path path)
 {
-  this->n_nodes = calculateChilds(path, this->root_node);
+  this->n_nodes = calculateChilds(path, this->root_node, hashMode);
   this->root_node->genHash();
   this->root_hash = this->root_node->hash;
 }
@@ -85,7 +91,7 @@ Mnode * getNodeFromPath(fs::path path, Mnode * root){
 * of the changed branch to the root.
 */
 void Mtree::addNode(fs::path path ){
-  Mnode *new_node = new Mnode();
+  Mnode *new_node = new Mnode(hashMode);
 
   fs::file_status s = fs::symlink_status(path);
   if(fs::is_regular_file(s)){

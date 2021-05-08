@@ -138,13 +138,23 @@ int main(){
     }
         
     //Initialize the merkle tree
-    tree = new Mtree();
+    int m;
+    r = getHashModeFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &m);
+    if (r == -1){
+        fprintf(log_file, SD_ERR "Failed to read configuration file.\n");
+        exit(r);   
+    }
+    else if (r == -2){
+        fprintf(log_file, SD_WARNING "Incorrect hash mode specified. using Blake3...\n");  
+    }
+    fprintf (log_file, SD_INFO "Using %s%s", (m==0) ? ("BLAKE3") : ("SHA256"), " hash algotithm\n");
+    tree = new Mtree(m);
     tree->populateTree(p);
     fprintf(log_file, SD_INFO "Config file read. Path:%s\n", p.c_str());
     fprintf(log_file,SD_INFO "Tree initialized\n");
     fprintf(log_file,SD_INFO "Root hash: %s\n", tree->root_hash.c_str());
     fflush(log_file);
-
+    tree->print();
     //At this point, the daemon will wait until something new happens
     //Read the updates from the kernel module
     while(1){

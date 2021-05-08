@@ -1,5 +1,18 @@
 #include "../include/mnode.hpp"
 Mnode::Mnode(){
+     HashDir = std::bind(&Mnode::_blake3_HashDir, this);
+     HashFile = std::bind(&Mnode::_blake3_HashFile, this);
+}
+
+Mnode::Mnode(int mode){
+    if (mode==0){
+        HashDir = std::bind(&Mnode::_blake3_HashDir, this);
+        HashFile = std::bind(&Mnode::_blake3_HashFile, this);       
+    }
+    if (mode==1){
+        HashDir = std::bind(&Mnode::_sha256_HashDir, this);
+        HashFile = std::bind(&Mnode::_sha256_HashFile, this);            
+    }
 }
 
 void Mnode::addChild(Mnode * ch){
@@ -18,10 +31,11 @@ void Mnode::print(){
         (*it)->print();
     }
 }
+
 //At first we'll asume all the child hashes are present and already calculated.
 // Needs to be improved
 /*Function to calculate and set the hash of a directoy*/
-void Mnode::HashDir(){
+void Mnode::_blake3_HashDir(){
     std::string value;
     blake3_hasher hasher;
     blake3_hasher_init(&hasher);
@@ -41,7 +55,7 @@ void Mnode::HashDir(){
     this->hash=convert.str(); 
 }
 /* Function to calculate and set the hash of the file*/
-void Mnode::HashFile(){
+void Mnode::_blake3_HashFile(){
     std::ifstream in{path,std::ios::binary};
     blake3_hasher hasher;
 
@@ -63,6 +77,50 @@ void Mnode::HashFile(){
     }
     this->hash=convert.str();
 }
+
+//At first we'll asume all the child hashes are present and already calculated.
+// Needs to be improved
+/*Function to calculate and set the hash of a directoy*/
+void Mnode::_sha256_HashDir(){
+    using namespace CryptoPP;
+    std::string predata="", value;
+    //For each child, we concatenate the hash
+     for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
+        predata.append((*it)->hash);
+    }
+    //we add the dir path
+    predata.append(path);
+    SHA256 hash;
+    StringSource fs( predata, true /* PumpAll */,
+          new HashFilter( hash, 
+            new HexEncoder( 
+              new StringSink( value )
+            ) // HexEncoder
+          ) // HashFilter
+        ); // FileSource
+    this->hash=value;
+}
+
+/* Function to calculate and set the hash of the file*/
+void Mnode::_sha256_HashFile(){
+    std::ifstream in{path,std::ios::binary};
+    using namespace CryptoPP;
+    SHA256 hash;
+    std::string value;
+    try {
+    FileSource fs( in, true /* PumpAll */,
+          new HashFilter( hash, 
+            new HexEncoder( 
+              new StringSink( value )
+            ) // HexEncoder
+          ) // HashFilter
+        ); // FileSource
+    }
+    catch (const CryptoPP::FileStore::ReadErr& e){
+        std::cout << "FSError:" << path << "\n";
+    }
+    this->hash=value;
+}
 /* Erase and free the specified child*/
 void Mnode::deleteChild(Mnode * child){
     child_nodes.erase(std::find(child_nodes.begin(),child_nodes.end(),child));
@@ -72,9 +130,10 @@ void Mnode::deleteChild(Mnode * child){
  * Depending of the type, the correct function will be called. 
  */
 void Mnode::genHash(){
-    if(type == MT_FILE)
-        HashFile();
-        
+    if(type == MT_FILE){
+
+        HashFile(this);
+    }
     if(type == MT_DIR)
-        HashDir();
+        HashDir(this);
 }
