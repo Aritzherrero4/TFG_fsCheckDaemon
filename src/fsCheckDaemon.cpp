@@ -41,6 +41,10 @@ static int method_getUpdate(sd_bus_message *m, void *userdata, sd_bus_error *ret
             file_updated(path);
             break;
     }
+    /**Integration**/
+    std::thread t(send_bus_message, tree->root_hash);
+    t.detach();
+    
     fflush(log_file);
     
     /*Send the reply even if we expect the call to be set as "No-reply"
@@ -48,6 +52,44 @@ static int method_getUpdate(sd_bus_message *m, void *userdata, sd_bus_error *ret
     sd_bus_reply_method_return(m, "i", 1);   
     return r;
 }
+/**Integration**/
+int send_bus_message(std::string hash){
+        int r=0;
+        sd_bus_message *m = NULL;
+                       
+        r = sd_bus_message_new_method_call(bus, &m,
+                                "net.aitorbelenguer.manager",             /* service to contact */
+                                "/net/aitorbelenguer/manager",            /* object path */
+                                "net.aitorbelenguer.manager",             /* interface name */
+                                "updateHash");                           /* method name */
+        if (r < 0) {
+                fprintf(log_file, "Failed to create new method call: %d\n", r);
+                return r;
+        }
+        sd_bus_message_append(m,"s",hash.c_str());
+        if (r < 0) {
+            fprintf(log_file, "Failed to append the arguments: %d\n", r);
+            return r;
+        }     
+        //Si queremos confirmación, esto deberá cambiar
+        r = sd_bus_message_set_expect_reply(m, 0);                      /*Set No-reply*/
+        if (r < 0) {
+            fprintf(log_file, "Failed to set no reply: %d\n", r);
+            return r;
+        }      
+        //the destionation buss is set to NULL, so the msg bus will be used
+        //The cookie is also NULL
+        r = sd_bus_send(NULL, m, NULL);                                 /* Send the message*/
+
+        if (r < 0) {
+                fprintf(log_file, "Failed to send the message: %d\n", r);
+                return r;
+        }
+        fprintf(log_file, SD_INFO "Update hash message sent to the network integrity service\n");
+        fflush(log_file);
+        return r; 
+}
+
 
 int initialize(){
     /* Create the log file */
@@ -154,6 +196,11 @@ int main(){
     fprintf(log_file, SD_INFO "Config file read. Path:%s\n", p.c_str());
     fprintf(log_file,SD_INFO "Tree initialized\n");
     fprintf(log_file,SD_INFO "Root hash: %s\n", tree->root_hash.c_str());
+
+
+    //Send initial hash to the network
+    fprintf(log_file, SD_INFO "Sending the initial root hash message\n");
+    send_bus_message(tree->root_hash);
     fflush(log_file);
     
     //At this point, the daemon will wait until something new happens
