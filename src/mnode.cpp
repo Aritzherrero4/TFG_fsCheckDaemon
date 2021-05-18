@@ -27,10 +27,7 @@ void Mnode::setParent(Mnode * p){
 }
 
 void Mnode::print(){
-    std::cout << path << ": ";
-    //if(type==MT_FILE)
-        std::cout << hash;
-    std::cout << "\n";
+    std::cout << path << ": " << hash << " " << isLeaf << "\n";
         
     for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
         (*it)->print();
@@ -44,10 +41,10 @@ void Mnode::_blake3_HashDir(){
     blake3_hasher_init(&hasher);
     //For each child, we concatenate the hash
      for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
-        blake3_hasher_update(&hasher, (*it)->hash.c_str() , sizeof((*it)->hash.c_str()));
+        blake3_hasher_update(&hasher, (*it)->hash.c_str() , strlen((*it)->hash.c_str()));
     }
     //we add the dir path
-    blake3_hasher_update(&hasher, path.c_str(),sizeof(path.c_str()));
+    blake3_hasher_update(&hasher, path.c_str(),strlen(path.c_str()));
 
     uint8_t output[BLAKE3_OUT_LEN];
     blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);

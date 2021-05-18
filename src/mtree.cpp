@@ -41,7 +41,6 @@ int calculateChilds(fs::path path, Mnode *tmp_node, int hashMode)
       Mnode *d_node = new Mnode(hashMode);
       n += calculateChilds(p, d_node, hashMode);
       d_node->setParent(tmp_node);
-      d_node->isLeaf = 0;
       d_node->type = MT_DIR;
       tmp_node->addChild(d_node);
       d_node->genHash(); //Add the actual hash;
@@ -59,6 +58,8 @@ int calculateChilds(fs::path path, Mnode *tmp_node, int hashMode)
       tmp_node->addChild(f_node);
     }
   }
+  if (n==1)
+    tmp_node->isLeaf = 1;
   return n;
 }
 
@@ -96,12 +97,13 @@ void Mtree::addNode(fs::path path ){
   fs::file_status s = fs::symlink_status(path);
   if(fs::is_regular_file(s)){
     new_node->type=MT_FILE;
+    new_node->isLeaf=1;
+    n_nodes++;
   } else if (fs::is_directory(s)){
     new_node->type=MT_DIR;
   }else{ //Another type of file like links
       return;
   }
-  n_nodes++;
   new_node->path=path;
   //If the root path and the parent path of the file are the same
   // we already know the node. 
@@ -109,11 +111,20 @@ void Mtree::addNode(fs::path path ){
     new_node->setParent(root_node);
   else
     new_node->setParent(getNodeFromPath(path.parent_path(), root_node));
-  new_node->isLeaf=1;
+
+  if(new_node->type == MT_DIR)
+    n_nodes += calculateChilds(new_node->path, new_node, hashMode);
+
+  if(new_node->child_nodes.size()!=0)
+    new_node->isLeaf=0;
+  else
+    new_node->isLeaf=1;      
+
   new_node->genHash();
   new_node->parent->addChild(new_node);
 
   Mnode * tmp_node = new_node ->parent;
+  
   while(tmp_node != root_node){
     tmp_node->genHash();
     tmp_node=tmp_node->parent;
