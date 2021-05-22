@@ -13,6 +13,9 @@ Mtree::Mtree(int hashMode)
   this->hashMode=hashMode;
   root_node = new Mnode(hashMode);
 }
+Mtree::~Mtree(){
+  delete root_node;
+}
 // Function to test the output
 //To be removed
 // void getFsDirList(fs::path path){

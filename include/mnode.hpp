@@ -40,6 +40,7 @@ class Mnode {
         std::vector<Mnode *> child_nodes;
 
         Mnode();
+        ~Mnode();
         Mnode(int mode);
         void addChild(Mnode * ch);
         void setParent(Mnode * p);

@@ -41,6 +41,7 @@ int getPathFromConfig(fs::path configFile, fs::path *cp){
             break;
         }
     }
+    cfg.close();
     return 0;
 }
 
@@ -70,5 +71,6 @@ int getHashModeFromConfig(fs::path configFile, int *mode){
             }break;
         }
     }
+    cfg.close();
     return 0;
 }

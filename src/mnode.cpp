@@ -6,6 +6,11 @@ Mnode::Mnode(){
      HashFile = std::bind(&Mnode::_blake3_HashFile, this);
 }
 
+Mnode::~Mnode(){
+    for (std::vector<Mnode *>::iterator it = child_nodes.begin(); it != child_nodes.end(); it++){
+        delete (*it);
+    }
+}
 /* Constructor, set the hash function variant acording to the mode parameter*/
 Mnode::Mnode(int mode){
     if (mode==_BLAKE3){
@@ -123,7 +128,7 @@ void Mnode::_sha256_HashFile(){
 /* Erase and free the specified child*/
 void Mnode::deleteChild(Mnode * child){
     child_nodes.erase(std::find(child_nodes.begin(),child_nodes.end(),child));
-    free(child);
+    delete child;
 }
 /* Caller function to generate the hash of any node
  * Depending of the type, the correct function will be called. 

@@ -4,15 +4,25 @@ void signal_handler(int sig) {
     if (sig == SIGTERM) {
         fprintf (log_file,SD_INFO "SIGTERM Received, daemon exiting\n");
         fclose(log_file);
+        delete tree;
+        sd_bus_slot_unref(slot);
+        sd_bus_flush_close_unref(bus);
         exit (1);
     }
     if (sig == SIGINT) {
-      fprintf (log_file,SD_INFO "SIGINT Received, daemon exiting\n");
-      fclose(log_file);
-      exit (1);
+        fprintf (log_file,SD_INFO "SIGINT Received, daemon exiting\n");
+        fclose(log_file);
+        delete tree;
+        sd_bus_slot_unref(slot);
+        sd_bus_flush_close_unref(bus);
+        exit (1);
     }
-    if (sig == SIGHUP){
+    if (sig == SIGHUP){ //At this point, it will exit
         fprintf (log_file,SD_INFO "SIGHUP Received, reloading config\n");
+        fclose(log_file);
+        delete tree;
+        sd_bus_slot_unref(slot);
+        sd_bus_flush_close_unref(bus);
         exit (1);        
     }
 }
@@ -87,6 +97,7 @@ int send_bus_message(std::string hash){
         }
         fprintf(log_file, SD_INFO "Update hash message sent to the network integrity service\n");
         fflush(log_file);
+        sd_bus_message_unref(m);
         return r; 
 }
 
@@ -168,17 +179,14 @@ int main(){
     r = initialize();
     if (r < 0)
         exit(r);
-    /* In the future, the path to control will be read from a configuration file 
-    *  This file will be the same for both the daemon and the module 
-    *  For now, it will be hardcoded here
-    */
+    /*Read the path from the configuration file*/
     fs::path p;
     r = getPathFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &p);
     if (r < 0){
         fprintf(log_file, "Failed to read configuration file.");
         exit(r);
     }
-        
+    
     //get the hash algorithm to use and initialize the merkle tree
     int m;
     r = getHashModeFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &m);
@@ -196,13 +204,12 @@ int main(){
     fprintf(log_file, SD_INFO "Config file read. Path:%s\n", p.c_str());
     fprintf(log_file,SD_INFO "Tree initialized\n");
     fprintf(log_file,SD_INFO "Root hash: %s\n", tree->root_hash.c_str());
-
+    p.~path(); //Free the path string to prevent memory leaks if exit is called.
 
     //Send initial hash to the network
     fprintf(log_file, SD_INFO "Sending the initial root hash message\n");
     send_bus_message(tree->root_hash);
     fflush(log_file);
-    
     //At this point, the daemon will wait until something new happens
     //Read the updates from the kernel module
     while(1){
@@ -224,8 +231,9 @@ int main(){
 //If a DBUS related error is detected, jump here
 //unreference from dbus and exit
 dbus_error:
+        delete tree;
         sd_bus_slot_unref(slot);
-        sd_bus_unref(bus);
+        sd_bus_flush_close_unref(bus);
         return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 

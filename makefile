@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17 -lstdc++fs -lcryptopp -Wall -lsystemd 
+CFLAGS = -std=c++17 -lstdc++fs -lcryptopp -Wall -lsystemd -O3
 BLFLAGS = -shared -O3
 IDIR = ./include/
 SDIR = ./src/

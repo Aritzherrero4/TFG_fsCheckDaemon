@@ -16,6 +16,7 @@ class Mtree{
         int hashMode=_BLAKE3; //Default hash mode is blake3
 
         Mtree();
+        ~Mtree();
         Mtree(int hashMode);
         void populateTree(fs::path path);
         void print();
