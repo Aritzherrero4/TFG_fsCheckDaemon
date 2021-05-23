@@ -173,6 +173,13 @@ void file_added(fs::path p){
 
 
 int main(){
+    /**Performance analysis**/    
+    std::chrono::_V2::system_clock::time_point start, stop;
+    std::chrono::milliseconds duration;
+    int tSize = 0, resident = 0, share = 0;
+
+    start = std::chrono::high_resolution_clock::now();
+
     /*Prepare and configure all the logging and the daemon structure related
      *The dbus conenection is also estabilished */
     int r; 
@@ -210,6 +217,28 @@ int main(){
     fprintf(log_file, SD_INFO "Sending the initial root hash message\n");
     send_bus_message(tree->root_hash);
     fflush(log_file);
+
+    /** Performance analysis **/
+    stop = std::chrono::high_resolution_clock::now();
+    std::ifstream buffer("/proc/self/statm");
+    buffer >> tSize >> resident >> share;
+    buffer.close();
+
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;
+    double rss = resident * page_size_kb;
+    double shared_mem = share * page_size_kb;
+
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    std::cout << "Time for init: " << duration.count() << "ms\n" 
+              << "ResMem:        " << rss << "KB\n" 
+              << "Shared:        " << shared_mem << "KB\n"
+              << "PrivMem:       " << rss -shared_mem << "KB\n";
+    std::cerr << duration.count() << ";" << rss << ";" << shared_mem << ";" << rss - shared_mem << ";" << tree->root_hash << "\n";
+
+    /** All the init relative information gathered, exit the program **/
+    goto dbus_error;
+
     //At this point, the daemon will wait until something new happens
     //Read the updates from the kernel module
     while(1){
@@ -231,9 +260,10 @@ int main(){
 //If a DBUS related error is detected, jump here
 //unreference from dbus and exit
 dbus_error:
+        fclose(log_file);
         delete tree;
         sd_bus_slot_unref(slot);
         sd_bus_flush_close_unref(bus);
-        return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+        exit (r < 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
