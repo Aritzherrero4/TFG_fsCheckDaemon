@@ -231,9 +231,10 @@ int main(){
 //If a DBUS related error is detected, jump here
 //unreference from dbus and exit
 dbus_error:
+        fclose(log_file);
         delete tree;
         sd_bus_slot_unref(slot);
         sd_bus_flush_close_unref(bus);
-        return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+        exit (r < 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
