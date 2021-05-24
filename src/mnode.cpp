@@ -53,11 +53,12 @@ void Mnode::_blake3_HashDir(){
 
     uint8_t output[BLAKE3_OUT_LEN];
     blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    std::ostringstream convert;
-    for (int a = 0; a < BLAKE3_OUT_LEN; a++) {
-        convert << std::uppercase << std::hex << (int)output[a];
-    }
-    this->hash=convert.str(); 
+    CryptoPP::StringSource ss(output, sizeof(output), true,
+        new CryptoPP::HexEncoder(
+            new CryptoPP::StringSink(this->hash)
+        ) // HexEncoder
+    ); // StringSource
+
 }
 /* Function to calculate and set the hash of the file using blake3*/
 void Mnode::_blake3_HashFile(){
@@ -76,11 +77,12 @@ void Mnode::_blake3_HashFile(){
     }
     uint8_t output[BLAKE3_OUT_LEN];
     blake3_hasher_finalize(&hasher, output, BLAKE3_OUT_LEN);
-    std::ostringstream convert;
-    for (int i = 0; i < BLAKE3_OUT_LEN; i++) {
-        convert << std::uppercase << std::hex << (int)output[i];
-    }
-    this->hash=convert.str();
+
+    CryptoPP::StringSource ss(output, sizeof(output), true,
+        new CryptoPP::HexEncoder(
+            new CryptoPP::StringSink(this->hash)
+        ) // HexEncoder
+    ); // StringSource
 }
 
 /*Function to calculate and set the hash of a directoy with sha256*/
