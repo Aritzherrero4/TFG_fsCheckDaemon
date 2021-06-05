@@ -11,7 +11,7 @@ Mnode::~Mnode(){
         delete (*it);
     }
 }
-/* Constructor, set the hash function variant acording to the mode parameter*/
+/* Constructor, set the hash function variant according to the mode parameter*/
 Mnode::Mnode(int mode){
     if (mode==_BLAKE3){
         HashDir = std::bind(&Mnode::_blake3_HashDir, this);
@@ -39,7 +39,7 @@ void Mnode::print(){
     }
 }
 
-/*Function to calculate and set the hash of a directoy using blake3*/
+/*Function to calculate and set the hash of a directory using blake3*/
 void Mnode::_blake3_HashDir(){
     std::string value;
     blake3_hasher hasher;
@@ -87,7 +87,7 @@ void Mnode::_blake3_HashFile(){
     ); // StringSource
 }
 
-/*Function to calculate and set the hash of a directoy with sha256*/
+/*Function to calculate and set the hash of a directory with sha256*/
 void Mnode::_sha256_HashDir(){
     using namespace CryptoPP;
     std::string predata="", value;

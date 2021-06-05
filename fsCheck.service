@@ -8,6 +8,7 @@ Description=Daemon to create a merkle tree and notify changes
 
 [Service]
 Type=dbus
+WorkingDirectory=/home/aritz/TFG-aritz/fsCheckDaemon/
 ExecStart=/home/aritz/TFG-aritz/fsCheckDaemon/fsCheckDaemon
 BusName=net.aritzherrero.fsCheck
 

@@ -68,9 +68,9 @@ int send_bus_message(std::string hash){
         sd_bus_message *m = NULL;
                        
         r = sd_bus_message_new_method_call(bus, &m,
-                                "net.aitorbelenguer.manager",             /* service to contact */
-                                "/net/aitorbelenguer/manager",            /* object path */
-                                "net.aitorbelenguer.manager",             /* interface name */
+                                "net.linker.manager",             /* service to contact */
+                                "/net/linker/manager",            /* object path */
+                                "net.linker.manager",             /* interface name */
                                 "updateHash");                           /* method name */
         if (r < 0) {
                 fprintf(log_file, "Failed to create new method call: %d\n", r);
@@ -81,13 +81,13 @@ int send_bus_message(std::string hash){
             fprintf(log_file, "Failed to append the arguments: %d\n", r);
             return r;
         }     
-        //Si queremos confirmación, esto deberá cambiar
+
         r = sd_bus_message_set_expect_reply(m, 0);                      /*Set No-reply*/
         if (r < 0) {
             fprintf(log_file, "Failed to set no reply: %d\n", r);
             return r;
         }      
-        //the destionation buss is set to NULL, so the msg bus will be used
+        //the destination buss is set to NULL, so the msg bus will be used
         //The cookie is also NULL
         r = sd_bus_send(NULL, m, NULL);                                 /* Send the message*/
 
@@ -174,14 +174,14 @@ void file_added(fs::path p){
 
 int main(){
     /*Prepare and configure all the logging and the daemon structure related
-     *The dbus conenection is also estabilished */
+     *The dbus connection is also established */
     int r; 
     r = initialize();
     if (r < 0)
         exit(r);
     /*Read the path from the configuration file*/
     fs::path p;
-    r = getPathFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &p);
+    r = getPathFromConfig( fs::current_path().concat("/fsCheck.config").c_str(), &p);
     if (r < 0){
         fprintf(log_file, "Failed to read configuration file.");
         exit(r);
@@ -189,7 +189,7 @@ int main(){
     
     //get the hash algorithm to use and initialize the merkle tree
     int m;
-    r = getHashModeFromConfig("/home/aritz/TFG-aritz/fsCheckDaemon/fsCheck.config", &m);
+    r = getHashModeFromConfig(fs::current_path().concat("/fsCheck.config").c_str(), &m);
     if (r == -1){
         fprintf(log_file, SD_ERR "Failed to read configuration file.\n");
         exit(r);   

@@ -16,14 +16,6 @@ Mtree::Mtree(int hashMode)
 Mtree::~Mtree(){
   delete root_node;
 }
-// Function to test the output
-//To be removed
-// void getFsDirList(fs::path path){
-//   for(auto& p: fs::recursive_directory_iterator(path)){
-//     fs::file_status s = fs::status(p);
-//     std::cout << p << "\n";
-//   }
-// }
 
 int calculateChilds(fs::path path, Mnode *tmp_node, int hashMode)
 {
@@ -139,7 +131,7 @@ void Mtree::addNode(fs::path path ){
 
 /* Update the hash of a changed file and update the hash
 *  of the corresponding brach. 
-*  For Edited or deteled files
+*  For Edited or deleted files
 */
 void Mtree::nodeChanged(fs::path path, int change){
   Mnode * tmp_node = getNodeFromPath(path, root_node);

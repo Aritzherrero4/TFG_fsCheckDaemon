@@ -4,7 +4,6 @@ BLFLAGS = -shared -O3
 IDIR = ./include/
 SDIR = ./src/
 ODIR = ./obj/
-BDIR = ./bin/
 LDIR = ./lib/
 BLAKE = ./external/blake3/
 BLIB = ./lib/libblake3.so
@@ -13,7 +12,6 @@ LD = -Wl,-rpath,$(LIBDIR) -L$(LIBDIR) -I$(BLAKE)
 arch := $(shell uname -m)
 
 main:$(SDIR)fsCheckDaemon.cpp $(IDIR)fsCheckDaemon.hpp $(ODIR)mnode.o $(ODIR)mtree.o $(IDIR)mtree.hpp $(ODIR)utils.o $(IDIR)utils.hpp
-
 	@echo Compiling fsCheckDaemon...
 	@g++ $(LD) -o fsCheckDaemon $(SDIR)fsCheckDaemon.cpp $(ODIR)mtree.o $(ODIR)mnode.o $(ODIR)utils.o -lblake3 $(CFLAGS) -lpthread
 	@echo Done 
@@ -23,6 +21,7 @@ $(ODIR)utils.o: $(SDIR)utils.cpp $(IDIR)utils.hpp
 	@g++ -c $(SDIR)utils.cpp -o $(ODIR)utils.o -std=c++17 -lstdc++fs -Wall
 
 $(ODIR)mnode.o: $(SDIR)mnode.cpp $(IDIR)mnode.hpp
+	@mkdir -p $(ODIR) $(LDIR)
 	@echo Compiling mnode...
 	@g++ $(LD) -c $(SDIR)mnode.cpp -o $(ODIR)mnode.o -lblake3 $(CFLAGS) 
 
@@ -49,19 +48,26 @@ ifneq ($(filter $(arch), arm64 aarch64),)
 	@gcc -shared -O3 -o $(LDIR)libblake3.so -DBLAKE3_USE_NEON $(BLAKE)blake3.c $(BLAKE)blake3_dispatch.c $(BLAKE)blake3_portable.c $(BLAKE)blake3_neon.c		
 endif
 	@echo Done
-.PHONY : clean, all, clean-all, fresh
+
+blake-portable:
+	@echo "Compiling the generic version of blake3:" 
+	@gcc -shared -O3 -o $(LDIR)libblake3.so $(BLAKE)blake3.c $(BLAKE)blake3_dispatch.c $(BLAKE)blake3_portable.c
+	@echo "Done."		
+
+.PHONY : clean, all, clean-all, fresh, generic
 
 all: blake main
 fresh: clean-all all
+generic: blake-portable main
 clean :
 	@echo Cleaning object files and the executable...
-	@rm $(ODIR)*
-	@rm fsCheckDaemon
+	@rm -f $(ODIR)*
+	@rm -f fsCheckDaemon
 	@echo Done
 clean-all:
 	@echo Cleaning object files, the executable and blake3 lib...
-	@rm $(LDIR)*
-	@rm $(ODIR)*
-	@rm fsCheckDaemon
+	@rm -f $(LDIR)*
+	@rm -f $(ODIR)*
+	@rm -f fsCheckDaemon
 	@echo Done
 
